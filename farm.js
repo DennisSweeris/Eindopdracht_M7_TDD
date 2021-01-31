@@ -1,32 +1,59 @@
-// Get yield for plant with no environment factors
-const getYieldForPlant = crop => crop.yield;
-
-// Get yield for crop
-const getYieldForCrop = input => getYieldForPlant(input.crop) * input.numCrops;
-
-// Get total yield with multiple crops
-const getTotalYield = ({ crops }) => {
-  let total = 0;
-  crops.forEach(crop => (total += getYieldForCrop(crop)));
-  return total;
+const getYieldForPlant = (input, environmentFactors) => {
+  if (!environmentFactors) return input.yield;
+  for (let [key, value] of Object.entries(environmentFactors)) {
+    let factor = input.factors[key];
+    let factorValue = factor[value];
+    input.yield = (input.yield * (100 + factorValue)) / 100;
+  }
+  return Math.floor(input.yield);
+  // to avoid recieving decimal yields
+  // only use fully grown plants
 };
 
-// Get cost per crop
+const getYieldForCrop = (input, environmentFactors) => {
+  if (!environmentFactors) return input.yield * input.numCrops;
+  for (let [key, value] of Object.entries(environmentFactors)) {
+    let factor = input.factors[key];
+    let factorValue = factor[value];
+    input.yield = (input.yield * (100 + factorValue)) / 100;
+  }
+  return Math.floor(input.yield * input.numCrops);
+};
+
+const getTotalYield = ({ crops }) => {
+  const totalYield = crops.map(crop => crop.crop.yield * crop.numCrops);
+  if (totalYield === 0) return totalYield;
+  else return totalYield.reduce((a, c) => a + c);
+};
+
 const getCostsForCrop = input => input.crop.cost * input.crop.numCrops;
 
-// Get revenue per crop
-const getRevenueForCrop = input => input.crop.salePrice * input.crop.numCrops;
+// const getRevenueForCrop = input => input.crop.numCrops * input.crop.salePrice;
+const getRevenueForCrop = (input, environmentFactors) => {
+  if (!environmentFactors) {
+    return input.crop.yield * input.crop.numCrops * input.crop.salePrice;
+  } else
+    return (
+      getYieldForCrop(input, environmentFactors) *
+      input.crop.numCrops *
+      input.crop.salePrice
+    );
+};
 
-// Get profit per crop
-const getProfitForCrop = input =>
-  getRevenueForCrop(input) - getCostsForCrop(input);
+const getProfitForCrop = (input, environmentFactors) => {
+  if (!environmentFactors)
+    return getRevenueForCrop(input) - getCostsForCrop(input);
+  else
+    return (
+      getYieldForCrop(input, environmentFactors) * getRevenueForCrop(input) -
+      getCostsForCrop(input)
+    );
+};
 
-// Get total profit with multiple crops
+// todo
 const getTotalProfit = ({ crops }) => {
   const getProfitForEachCrop = crops.map(crop => getProfitForCrop(crop));
-  return getProfitForEachCrop.reduce(
-    (accumulator, currentValue) => accumulator + currentValue
-  );
+  return getProfitForEachCrop.reduce((a, c) => a + c);
 };
 
 module.exports = {
