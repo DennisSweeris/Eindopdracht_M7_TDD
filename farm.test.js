@@ -334,4 +334,52 @@ describe("Get total profit", () => {
     const crops = [{ crop: courgette }, { crop: bananas }];
     expect(getTotalProfit({ crops })).toBe(54);
   });
+
+  test("Get profit for multiple crops, environment factors - sun and wind", () => {
+    const courgette = {
+      name: "courgette",
+      yield: 2,
+      cost: 2,
+      salePrice: 3,
+      numCrops: 6,
+      factors: {
+        sun: {
+          low: -20,
+          medium: 0,
+          high: 50,
+        },
+        wind: {
+          low: 0,
+          medium: -30,
+          high: -60,
+        },
+      },
+    };
+    const bananas = {
+      name: "bananas",
+      yield: 2,
+      cost: 2,
+      salePrice: 4,
+      numCrops: 5,
+      factors: {
+        sun: {
+          low: -20,
+          medium: 0,
+          high: 50,
+        },
+        wind: {
+          low: 0,
+          medium: -30,
+          high: -60,
+        },
+      },
+    };
+
+    const environmentFactors = {
+      sun: "low",
+      wind: "high",
+    };
+    const crops = [{ crop: courgette }, { crop: bananas }];
+    expect(getTotalProfit({ crops }, environmentFactors)).toBe(54);
+  });
 });

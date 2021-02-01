@@ -28,11 +28,10 @@ const getTotalYield = ({ crops }) => {
 
 const getCostsForCrop = input => input.crop.cost * input.crop.numCrops;
 
-// const getRevenueForCrop = input => input.crop.numCrops * input.crop.salePrice;
 const getRevenueForCrop = (input, environmentFactors) => {
-  if (!environmentFactors) {
+  if (!environmentFactors)
     return input.crop.yield * input.crop.numCrops * input.crop.salePrice;
-  } else
+  else
     return (
       getYieldForCrop(input, environmentFactors) *
       input.crop.numCrops *
@@ -42,18 +41,21 @@ const getRevenueForCrop = (input, environmentFactors) => {
 
 const getProfitForCrop = (input, environmentFactors) => {
   if (!environmentFactors)
-    return getRevenueForCrop(input) - getCostsForCrop(input);
+    return (
+      getRevenueForCrop(input, environmentFactors) - getCostsForCrop(input)
+    );
   else
     return (
-      getYieldForCrop(input, environmentFactors) * getRevenueForCrop(input) -
+      getYieldForCrop(input, environmentFactors) *
+        getRevenueForCrop(input, environmentFactors) -
       getCostsForCrop(input)
     );
 };
 
-// todo
 const getTotalProfit = ({ crops }) => {
-  const getProfitForEachCrop = crops.map(crop => getProfitForCrop(crop));
-  return getProfitForEachCrop.reduce((a, c) => a + c);
+  const getProfitPerCrop = crops.map(crop => getProfitForCrop(crop));
+  if (getProfitPerCrop === 0) return getProfitPerCrop;
+  else return getProfitPerCrop.reduce((a, c) => a + c);
 };
 
 module.exports = {
