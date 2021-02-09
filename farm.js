@@ -7,30 +7,29 @@ const getYieldForPlant = (input, environmentFactors) => {
   }
   return input.yield;
 };
-const getYieldForCrop = (input, environmentFactors) => {
-  if (!environmentFactors) return input.yield * input.numCrops;
-  else return getYieldForPlant(input, environmentFactors) * input.numCrops;
-};
+const getYieldForCrop = (input, environmentFactors) =>
+  !environmentFactors
+    ? input.yield * input.numCrops
+    : getYieldForPlant(input, environmentFactors) * input.numCrops;
 
-// TODO - Include environmentFactors
-const getTotalYield = ({ crops }) =>
-  crops.map(crop => crop.crop.yield * crop.numCrops).reduce((a, c) => a + c);
+const getTotalYield = ({ crops }, environmentFactors) =>
+  !environmentFactors
+    ? crops.map(crop => crop.crop.yield * crop.numCrops).reduce((a, c) => a + c)
+    : crops
+        .map(crop => getYieldForCrop(crop, environmentFactors))
+        .reduce((a, c) => a + c);
 
 const getCostsForCrop = input => input.crop.cost * input.crop.numCrops;
 
-const getRevenueForCrop = (input, environmentFactors) => {
-  return getYieldForCrop(input.crop, environmentFactors) * input.crop.salePrice;
-};
+const getRevenueForCrop = (input, environmentFactors) =>
+  getYieldForCrop(input.crop, environmentFactors) * input.crop.salePrice;
 
-const getProfitForCrop = (input, environmentFactors) => {
-  if (!environmentFactors)
-    return getRevenueForCrop(input, environmentFactors) - getCostsForCrop(input);
-  else
-    return (
-      getYieldForCrop(input, environmentFactors) * getRevenueForCrop(input, environmentFactors) -
-      getCostsForCrop(input)
-    );
-};
+const getProfitForCrop = (input, environmentFactors) =>
+  !environmentFactors
+    ? getRevenueForCrop(input, environmentFactors) - getCostsForCrop(input)
+    : getYieldForCrop(input, environmentFactors) *
+        getRevenueForCrop(input, environmentFactors) -
+      getCostsForCrop(input);
 
 const getTotalProfit = ({ crops }) =>
   crops.map(crop => getProfitForCrop(crop)).reduce((a, c) => a + c);
